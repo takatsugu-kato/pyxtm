@@ -1,6 +1,7 @@
-import requests
+"""XTM Client"""
 import json
 from datetime import datetime
+import requests
 
 class APIException(Exception):
     """API Exception"""
