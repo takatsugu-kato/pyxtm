@@ -263,6 +263,22 @@ class XtmClient:
         }
         return self.__call_rest(url, ReqMethod.GET, params=params)
 
+    def wait_for_file_completion(
+        self,
+        file_id: int,
+        project_id: int,
+        file_scope: FilesScopeType = FilesScopeType.JOB,
+        max_attempts: int = 10,
+    ) -> dict:
+        for _ in range(max_attempts):
+            status_response = self.obtain_status_of_generated_file(file_id, project_id, file_scope)
+            status = status_response.get("status")
+
+            if status == "FINISHED":
+                return status_response
+
+        raise APIException(f"File status did not reach 'FINISHED' after {max_attempts} attempts.")
+
     def __generate_token(self, client_name:str, user_id:int, password:str) -> str:
         """__generate_token
 
