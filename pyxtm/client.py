@@ -8,6 +8,11 @@ class APIException(Exception):
     def __init__(self, message):
         self.message = message
 
+class APIException(Exception):
+    """API Exception"""
+    def __init__(self, message):
+        self.message = message
+
 class ReqMethod():
     """Request Method"""
     POST = "post"
@@ -330,6 +335,8 @@ class XtmClient:
             raise ValueError(f"Unsupported request method: {method}")
 
         if result.status_code == 404:
+            if result.text:
+                raise APIException(json.loads(result.text))
             raise APIException(result.reason)
         if result.status_code != 200:
             raise APIException(json.loads(result.text))
