@@ -2,71 +2,8 @@
 import json
 from datetime import datetime
 import requests
-
-class APIException(Exception):
-    """API Exception"""
-    def __init__(self, message):
-        self.message = message
-
-class APIException(Exception):
-    """API Exception"""
-    def __init__(self, message):
-        self.message = message
-
-class ReqMethod():
-    """Request Method"""
-    POST = "post"
-    GET = "get"
-
-class LQAType():
-    """LQAType"""
-    LANGUAGE = "LANGUAGE"
-    FILE = "FILE"
-
-class FilesScopeType():
-    """FilesScopeType"""
-    JOB = "JOB"
-    PROJECT = "PROJECT"
-
-class FetchTargetFileType():
-    """FetchTargetFileType"""
-    NO_CONTENT = "NO_CONTENT"
-    NON_ANALYSABLE = "NON_ANALYSABLE"
-    NOT_SUPPORTED = "NOT_SUPPORTED"
-
-class FileNameFilterType():
-    """FileNameFilterType"""
-    CONTAINS = "CONTAINS"
-    EQUALS = "EQUALS"
-    STARTS_WITH = "STARTS_WITH"
-    ENDS_WITH = "ENDS_WITH"
-
-class FileType():
-    """FileType"""
-    TARGET = "TARGET"
-    XLIFF = "XLIFF"
-    XLIFF_NTP = "XLIFF_NTP"
-    QA_REPORT = "QA_REPORT"
-    HTML = "HTML"
-    HTML_TABLE = "HTML_TABLE"
-    PDF = "PDF"
-    PDF_TABLE = "PDF_TABLE"
-    TIPP = "TIPP"
-    HTML_EXTENDED_TABLE = "HTML_EXTENDED_TABLE"
-    HTML_COLOURED = "HTML_COLOURED"
-    HTML_COLOURED_BY_MATCH_RATE = "HTML_COLOURED_BY_MATCH_RATE"
-    PDF_EXTENDED_TABLE = "PDF_EXTENDED_TABLE"
-    PDF_COLOURED = "PDF_COLOURED"
-    PDF_COLOURED_BY_XLIFF_DOC_STATUS = "PDF_COLOURED_BY_XLIFF_DOC_STATUS"
-    PDF_COLOURED_BY_MATCH_RATE = "PDF_COLOURED_BY_MATCH_RATE"
-    TARGET_COLOURED_BY_MATCH_RATE = "TARGET_COLOURED_BY_MATCH_RATE"
-    TARGET_COLOURED_BY_XLIFF_DOC_STATUS = "TARGET_COLOURED_BY_XLIFF_DOC_STATUS"
-    XLIFF_DOC = "XLIFF_DOC"
-    LQA_REPORT = "LQA_REPORT"
-    LQA_EXTENDED_TABLE_REPORT = "LQA_EXTENDED_TABLE_REPORT"
-    TARGET_PSEUDO = "TARGET_PSEUDO"
-    MULTI_EXCEL = "MULTI_EXCEL"
-    EXCEL_EXTENDED_TABLE = "EXCEL_EXTENDED_TABLE"
+from .const import ReqMethod, LQAType, FilesScopeType, FileNameFilterType, FileType
+from .exception import APIException
 
 class XtmClient:
     """XtmClient class"""
@@ -74,18 +11,7 @@ class XtmClient:
         self.token = ""
         self.token = self.__generate_token(client_name, user_id, password)
 
-    def obtain_project(self, project_id:int) -> dict:
-        """Obtain project
-
-        Args:
-            project_id (int): Project ID
-
-        Returns:
-            dict: https://www.xtm-cloud.com/rest-api/#tag/Projects/operation/getProject
-        """
-        url = f"https://www.xtm-cloud.com/project-manager-api-rest/projects/{project_id}"
-        return self.__call_rest(url, ReqMethod.GET)
-
+    # Project LQA
     def obtain_project_lqa(
         self,
         project_ids:list,
@@ -120,6 +46,62 @@ class XtmClient:
 
         return self.__call_rest(url, ReqMethod.GET, params=params)
 
+    def download_project_lqa(
+        self,
+        project_ids:list,
+        report_id:int=None,
+        target_languages:list=None,
+        evaluee_ids:list=None,
+        workflow_step_ids:list=None,
+        evaluator_ids:list=None,
+        lqa_type:LQAType=None,
+        complete_date_from:datetime=None,
+        complete_date_to:datetime=None
+    ) -> dict:
+        """Download project LQA
+
+        Args:
+            project_ids (list): project_ids
+            report_id (int, optional): report_id. Defaults to None.
+            target_languages (list, optional): target_languages. Defaults to None.
+            evaluee_ids (list, optional): evaluee_ids. Defaults to None.
+            workflow_step_ids (list, optional): workflow_step_ids. Defaults to None.
+            evaluator_ids (list, optional): evaluator_ids. Defaults to None.
+            lqa_type (LQAType, optional): lqa_type. Defaults to None.
+            complete_date_from (datetime, optional): complete_date_from. Defaults to None.
+            complete_date_to (datetime, optional): complete_date_to. Defaults to None.
+
+        Returns:
+            dict: https://www.xtm-cloud.com/rest-api/#tag/Project-LQA/operation/downloadLqa
+        """
+        url = "https://www.xtm-cloud.com/project-manager-api-rest/projects/lqa/download"
+        params = {
+            "reportID": report_id,
+            "projectIds": project_ids,
+            "targetLanguages": target_languages,
+            "evalueeIds": evaluee_ids,
+            "evaluatorIds": evaluator_ids,
+            "workflowStepIds": workflow_step_ids,
+            "completeDateFrom": complete_date_from,
+            "completeDateTo": complete_date_to,
+            "type": lqa_type,
+        }
+        return self.__call_rest(url, ReqMethod.GET, params=params)
+
+    # Project
+    def obtain_project(self, project_id:int) -> dict:
+        """Obtain project
+
+        Args:
+            project_id (int): Project ID
+
+        Returns:
+            dict: https://www.xtm-cloud.com/rest-api/#tag/Projects/operation/getProject
+        """
+        url = f"https://www.xtm-cloud.com/project-manager-api-rest/projects/{project_id}"
+        return self.__call_rest(url, ReqMethod.GET)
+
+    # Project files
     def generate_specific_files(
         self,
         project_id:int,
@@ -168,45 +150,20 @@ class XtmClient:
         }
         return self.__call_rest(url, ReqMethod.GET, params=params)
 
-    def download_project_lqa(
-        self,
-        project_ids:list,
-        report_id:int=None,
-        target_languages:list=None,
-        evaluee_ids:list=None,
-        workflow_step_ids:list=None,
-        evaluator_ids:list=None,
-        lqa_type:LQAType=None,
-        complete_date_from:datetime=None,
-        complete_date_to:datetime=None
-    ) -> dict:
-        """Download project LQA
+    def download_project_file(self, project_id:int, file_id:int, file_scope:FilesScopeType=FilesScopeType.JOB) -> str:
+        """Download project file
 
         Args:
-            project_ids (list): project_ids
-            report_id (int, optional): report_id. Defaults to None.
-            target_languages (list, optional): target_languages. Defaults to None.
-            evaluee_ids (list, optional): evaluee_ids. Defaults to None.
-            workflow_step_ids (list, optional): workflow_step_ids. Defaults to None.
-            evaluator_ids (list, optional): evaluator_ids. Defaults to None.
-            lqa_type (LQAType, optional): lqa_type. Defaults to None.
-            complete_date_from (datetime, optional): complete_date_from. Defaults to None.
-            complete_date_to (datetime, optional): complete_date_to. Defaults to None.
+            project_id (int): project_id
+            file_id (int): file_id
+            file_scope (FilesScopeType, optional): file_scope. Defaults to FilesScopeType.JOB.
 
         Returns:
-            dict: https://www.xtm-cloud.com/rest-api/#tag/Project-LQA/operation/downloadLqa
+            binaly data: The response is generated in the application/octet-stream format as a target extension file (xlsx, xliff).
         """
-        url = "https://www.xtm-cloud.com/project-manager-api-rest/projects/lqa/download"
+        url = f"https://www.xtm-cloud.com/project-manager-api-rest/projects/{project_id}/files/{file_id}/download"
         params = {
-            "reportID": report_id,
-            "projectIds": project_ids,
-            "targetLanguages": target_languages,
-            "evalueeIds": evaluee_ids,
-            "evaluatorIds": evaluator_ids,
-            "workflowStepIds": workflow_step_ids,
-            "completeDateFrom": complete_date_from,
-            "completeDateTo": complete_date_to,
-            "type": lqa_type,
+            "fileScope": file_scope
         }
         return self.__call_rest(url, ReqMethod.GET, params=params)
 
@@ -251,23 +208,6 @@ class XtmClient:
         }
         return self.__call_rest(url, ReqMethod.GET, params=params)
 
-    def download_project_file(self, project_id:int, file_id:int, file_scope:FilesScopeType=FilesScopeType.JOB) -> str:
-        """Download project file
-
-        Args:
-            project_id (int): project_id
-            file_id (int): file_id
-            file_scope (FilesScopeType, optional): file_scope. Defaults to FilesScopeType.JOB.
-
-        Returns:
-            binaly data: The response is generated in the application/octet-stream format as a target extension file (xlsx, xliff).
-        """
-        url = f"https://www.xtm-cloud.com/project-manager-api-rest/projects/{project_id}/files/{file_id}/download"
-        params = {
-            "fileScope": file_scope
-        }
-        return self.__call_rest(url, ReqMethod.GET, params=params)
-
     def wait_for_file_completion(
         self,
         file_id: int,
@@ -275,6 +215,20 @@ class XtmClient:
         file_scope: FilesScopeType = FilesScopeType.JOB,
         max_attempts: int = 10,
     ) -> dict:
+        """Wait for file completion
+
+        Args:
+            file_id (int): file_id
+            project_id (int): project_id
+            file_scope (FilesScopeType, optional): file_scope. Defaults to FilesScopeType.JOB.
+            max_attempts (int, optional): max_attempts. Defaults to 10.
+
+        Raises:
+            APIException: APIException
+
+        Returns:
+            dict: status_response
+        """
         for _ in range(max_attempts):
             status_response = self.obtain_status_of_generated_file(file_id, project_id, file_scope)
             status = status_response.get("status")
@@ -284,6 +238,7 @@ class XtmClient:
 
         raise APIException(f"File status did not reach 'FINISHED' after {max_attempts} attempts.")
 
+    # static method
     def __generate_token(self, client_name:str, user_id:int, password:str) -> str:
         """__generate_token
 
