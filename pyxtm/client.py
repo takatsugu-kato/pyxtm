@@ -2,7 +2,7 @@
 import json
 from datetime import datetime
 import requests
-from .const import ReqMethod, LQAType, FilesScopeType, FileNameFilterType, FileType
+from .const import ReqMethod, LQAType, FilesScopeType, FileNameFilterType, FileType, BoolType, metricsFilesType, ActivityType
 from .exception import APIException
 
 class XtmClient:
@@ -10,6 +10,86 @@ class XtmClient:
     def __init__(self, client_name:str, user_id:int, password:str):
         self.token = ""
         self.token = self.__generate_token(client_name, user_id, password)
+
+    # User
+    def obtain_users_that_match_specific_criteria(
+        self,
+        usernames:list=None,
+        ids:list=None,
+        fetch_address:BoolType=BoolType.YES
+    ) -> list:
+        """Obtain users that match specific criteria
+
+        Args:
+            usernames (list, optional): usernames. Defaults to None.
+            ids (list, optional): ids. Defaults to None.
+            fetch_address (BoolType, optional): fetch_address. Defaults to BoolType.YES.
+
+        Returns:
+            list: list
+        """
+        url = "https://www.xtm-cloud.com/project-manager-api-rest/users"
+        params = {
+            "usernames": usernames,
+            "ids": ids,
+            "fetchAddress": fetch_address
+        }
+
+        return self.__call_rest(url, ReqMethod.GET, params=params)
+
+    # Project analytics
+    def download_metric_file(
+        self,
+        metrics_files_type:metricsFilesType,
+    ) -> str:
+        """Download metric file
+
+        Args:
+            metrics_files_type (metricsFilesType): metrics_files_type
+
+        Returns:
+            str: xlsx
+        """
+        url = "https://www.xtm-cloud.com/project-manager-api-rest/users"
+        params = {
+            "metricsFilesType": metrics_files_type,
+        }
+
+        return self.__call_rest(url, ReqMethod.GET, params=params)
+
+    # Project custom fields
+    def obtain_project_custom_fields(
+        self,
+        project_id:int,
+        activity:ActivityType=ActivityType.ACTIVE
+    ) -> dict:
+        """Obtain project custom fields
+
+        Args:
+            project_id (int): project_id
+            activity (ActivityType, optional): activity. Defaults to ActivityType.ACTIVE.
+
+        Returns:
+            dict: custom_fields
+        """
+        url = f"https://www.xtm-cloud.com/project-manager-api-rest/projects/{project_id}/custom-fields?activity=ACTIVE"
+        params = {
+            "activity": activity,
+        }
+
+        return self.__call_rest(url, ReqMethod.GET, params=params)
+
+    # Custom fileds
+    def obtain_custom_fields_definitions_for_project(
+        self,
+    ) -> dict:
+        """Obtain custom fields definitions for project
+
+        Returns:
+            dict: custom fields
+        """
+        url = "https://www.xtm-cloud.com/project-manager-api-rest/custom-fields/project"
+        return self.__call_rest(url, ReqMethod.GET)
 
     # Project LQA
     def obtain_project_lqa(

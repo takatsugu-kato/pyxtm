@@ -1,3 +1,12 @@
+class ActivityType():
+    ACTIVE = "ACTIVE"
+    ALL = "ALL"
+class metricsFilesType():
+    INITIAL = "INITIAL"
+    CURRENT = "CURRENT"
+class BoolType():
+    YES = "YES"
+    NO = "NO"
 class ReqMethod():
     """Request Method"""
     POST = "post"
