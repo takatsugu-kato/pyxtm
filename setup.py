@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="pyxtm",
-    version="0.9.1",
+    version="0.9.2",
     author="tkato",
     author_email="takatsugu-kato@outlook.jp",
     description="pyxtm module handles xtm.",

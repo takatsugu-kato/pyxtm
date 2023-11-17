@@ -40,6 +40,7 @@ class XtmClient:
     # Project analytics
     def download_metric_file(
         self,
+        project_id:int,
         metrics_files_type:metricsFilesType,
     ) -> str:
         """Download metric file
@@ -50,7 +51,7 @@ class XtmClient:
         Returns:
             str: xlsx
         """
-        url = "https://www.xtm-cloud.com/project-manager-api-rest/users"
+        url = f"https://www.xtm-cloud.com/project-manager-api-rest/projects/{project_id}/metrics/files/download"
         params = {
             "metricsFilesType": metrics_files_type,
         }
