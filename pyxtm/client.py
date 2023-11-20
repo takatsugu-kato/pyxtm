@@ -58,6 +58,27 @@ class XtmClient:
 
         return self.__call_rest(url, ReqMethod.GET, params=params)
 
+    def obtain_metrics_that_match_specific_criteria(
+        self,
+        project_id:int,
+        target_languages:list=None,
+    ) -> dict:
+        """Obtain metrics that match specific criteria
+
+        Args:
+            project_id (int): project_id
+            target_languages (list, optional): target_languages. Defaults to None.
+
+        Returns:
+            dict: https://www.xtm-cloud.com/rest-api/#tag/Project-analytics/operation/findProjectMetrics
+        """
+        url = f"https://www.xtm-cloud.com/project-manager-api-rest/projects/{project_id}/metrics"
+        params = {
+            "targetLanguages": target_languages,
+        }
+
+        return self.__call_rest(url, ReqMethod.GET, params=params)
+
     # Project custom fields
     def obtain_project_custom_fields(
         self,
