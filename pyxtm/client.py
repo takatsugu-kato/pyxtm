@@ -2,7 +2,7 @@
 import json
 from datetime import datetime
 import requests
-from .const import ReqMethod, LQAType, FilesScopeType, FileNameFilterType, FileType, BoolType, metricsFilesType, ActivityType
+from .const import ReqMethod, LQAType, FilesScopeType, FileNameFilterType, FileType, BoolType, metricsFilesType, ActivityType, GenerateCostsSourceType
 from .exception import APIException
 
 class XtmClient:
@@ -339,6 +339,31 @@ class XtmClient:
                 return status_response
 
         raise APIException(f"File status did not reach 'FINISHED' after {max_attempts} attempts.")
+
+    # Project costs
+    def generate_costs(self, project_id:int, source:GenerateCostsSourceType, user_id:int) -> dict:
+        """_summary_
+
+        Args:
+            project_id (int): project id
+            source (GenerateCostsSourceType): source type
+            user_id (int): assignment user id
+
+        Returns:
+            dict: cost id
+        """
+        url = f"https://www.xtm-cloud.com/project-manager-api-rest/projects/{project_id}/costs"
+        body = {
+            "missingRates": "ZERO",
+            "missingTime": "ZERO",
+            "source": source,
+            "assignment": {
+                "override": "OVERRIDE_ALL",
+                "userId": user_id,
+                "userType": "INTERNAL_LINGUIST"
+            },
+        }
+        return self.__call_rest(url, ReqMethod.POST, body=body)
 
     # static method
     def __generate_token(self, client_name:str, user_id:int, password:str) -> str:
